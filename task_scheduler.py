@@ -77,8 +77,8 @@ def transform_tasks(db_tasks):
     task_objects = []
     for row in db_tasks:
         name = row['name']
-        start_time = datetime.datetime.strptime(row['start_time'], "%Y-%m-%d %H:%M:%S")
-        deadline = datetime.datetime.strptime(row['deadline'], "%Y-%m-%d %H:%M:%S")
+        start_time = row['start_time']
+        deadline = row['deadline']
         duration = row['duration']
         priority = row['priority']
         category = row['category']
