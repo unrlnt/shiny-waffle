@@ -1,5 +1,5 @@
 from ortools.sat.python import cp_model
-import datetime
+from datetime import *
 from import_db import create_connection
 from dateutil.relativedelta import relativedelta
 
