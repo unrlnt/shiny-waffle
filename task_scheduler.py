@@ -9,9 +9,9 @@ def int_to_datetime(ts):
     return datetime.datetime.fromtimestamp(ts)
 
 class Task:
-    def __init__(self, name, start_date, deadline, duration, priority, category):
+    def __init__(self, name, start_time, deadline, duration, priority, category):
         self.name = name
-        self.start_date = datetime_to_int(start_date)
+        self.start_time = datetime_to_int(start_time)
         self.deadline = datetime_to_int(deadline)
         self.duration = duration  # In minutes
         self.priority = priority  # 0 to 1
