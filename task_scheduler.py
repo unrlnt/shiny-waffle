@@ -1,6 +1,7 @@
 from ortools.sat.python import cp_model
 import datetime
 from import_db import create_connection
+from dateutil.relativedelta import relativedelta
 
 def datetime_to_int(dt):
     return int(dt.timestamp())
@@ -131,8 +132,8 @@ schedules = transform_schedules(db_schedules)
 print("Parsed Schedules:", schedules)
 
 # Generate 5-minute slots for all schedules
-start_date = datetime.datetime(2025, 1, 22)
-end_date = datetime.datetime(2025, 1, 31)
+start_date = datetime.now()
+end_date = start_date+relativedelta(months=+1)
 all_slots = create_time_slots(schedules, start_date, end_date)
 
 # Initialize the model
