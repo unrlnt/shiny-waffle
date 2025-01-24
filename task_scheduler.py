@@ -176,7 +176,18 @@ for task in tasks:
         remaining_duration -= overlap_duration
 
     if remaining_duration > 0:
-        raise ValueError(f"Task {task.name} cannot be fully scheduled within its constraints.")
+        #logic to extend the task even after the deadline amd change the status in the database to 'delayed'
+        delayed_start = max(valid_start_times) + 1  # Start right after the last valid slot
+        delayed_end = delayed_start + remaining_duration
+
+        delayed_split_start = model.NewIntVar(delayed_start, delayed_end - remaining_duration, f"{task.name}_delayed_start")
+        delayed_split_end = model.NewIntVar(delayed_start + remaining_duration, delayed_end, f"{task.name}_delayed_end")
+        delayed_split_interval = model.NewIntervalVar(delayed_split_start, remaining_duration, delayed_split_end, f"{task.name}_delayed_interval")
+
+        model.Add(delayed_split_end - delayed_split_start == remaining_duration)
+
+        split_intervals.append(delayed_split_interval)
+        print(f"Warning: Task {task.name} exceeds its deadline and is marked as delayed.")
 
     task_starts[task.name] = start_var
     task_ends[task.name] = end_var
