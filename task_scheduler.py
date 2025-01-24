@@ -1,6 +1,6 @@
 from ortools.sat.python import cp_model
 import datetime
-from import_db.py import create_connection
+from import_db import create_connection
 
 def datetime_to_int(dt):
     return int(dt.timestamp())
