@@ -132,7 +132,7 @@ schedules = transform_schedules(db_schedules)
 print("Parsed Schedules:", schedules)
 
 # Generate 5-minute slots for all schedules
-start_date = datetime.now()
+start_date = datetime.date.now()
 end_date = start_date+relativedelta(months=+1)
 all_slots = create_time_slots(schedules, start_date, end_date)
 
