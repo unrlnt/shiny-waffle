@@ -65,7 +65,7 @@ def get_tasks():
     connection = create_connection()
     if connection:
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM tasks"
+        query = "SELECT * FROM tasks WHERE status = 'pending' ORDER BY priority DESC, deadline ASC"
         cursor.execute(query)
         tasks = cursor.fetchall()
         cursor.close()
@@ -73,11 +73,23 @@ def get_tasks():
         return tasks
     return []
 
-tasks = get_tasks()
-print("Fetched Tasks:", tasks)
-old_tasks = [
-    Task("Example", datetime.datetime(2025, 1, 22, 16, 30), datetime.datetime(2025, 1, 23, 18, 0), 120, 1, "work"),
-]
+def transform_tasks(db_tasks):
+    task_objects = []
+    for row in db_tasks:
+        name = row['name']
+        start_time = datetime.datetime.strptime(row['start_time'], "%Y-%m-%d %H:%M:%S")
+        deadline = datetime.datetime.strptime(row['deadline'], "%Y-%m-%d %H:%M:%S")
+        duration = row['duration']
+        priority = row['priority']
+        category = row['category']
+        task_objects.append(Task(name, start_time, deadline, duration, priority, category))
+    return task_objects
+
+db_tasks = get_tasks()
+print("Fetched Tasks:", db_tasks)
+
+tasks = transform_tasks(db_tasks)
+print("Parsed Tasks:", tasks)
 
 # Define schedules
 def get_schedules():
@@ -92,8 +104,8 @@ def get_schedules():
         return schedules
     return []
 
-schedules = get_schedules()
-print("Fetched Schedules:", schedules)
+fetched_schedules = get_schedules()
+print("Fetched Schedules:", fetched_schedules)
 
 def transform_schedules(db_schedules):
     schedules = {}
@@ -109,8 +121,8 @@ def transform_schedules(db_schedules):
     return schedules
 
 db_schedules = get_schedules()
-parsed_schedules = transform_schedules(db_schedules)
-print("Parsed Schedules:", parsed_schedules)
+schedules = transform_schedules(db_schedules)
+print("Parsed Schedules:", schedules)
 
 # Generate 5-minute slots for all schedules
 start_date = datetime.datetime(2025, 1, 22)
