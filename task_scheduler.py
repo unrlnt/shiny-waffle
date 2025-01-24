@@ -76,13 +76,15 @@ def get_tasks():
 def transform_tasks(db_tasks):
     task_objects = []
     for row in db_tasks:
-        name = row['name']
-        start_time = row['start_time']
-        deadline = row['deadline']
-        duration = row['duration']
-        priority = row['priority']
-        category = row['category']
-        task_objects.append(Task(name, start_time, deadline, duration, priority, category))
+        task = Task(
+            name=row['name'],
+            start_time=row['start_time'],
+            deadline=row['deadline'],
+            duration=row['duration'],
+            priority=row['priority'],
+            category=row['category']
+        )
+        task_objects.append(task)
     return task_objects
 
 db_tasks = get_tasks()
