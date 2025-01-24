@@ -65,16 +65,6 @@ def combine_consecutive_slots(task_schedule):
             combined_schedule[task].extend(combined)
     return combined_schedule
 
-def update_task_status(task_name, status):
-    connection = create_connection()
-    if connection:
-        cursor = connection.cursor()
-        query = "UPDATE tasks SET status = %s WHERE name = %s"
-        cursor.execute(query, (status, task_name))
-        connection.commit()
-        cursor.close()
-        connection.close()
-
 # Define tasks
 def get_tasks():
     connection = create_connection()
@@ -102,6 +92,16 @@ def transform_tasks(db_tasks):
         task_objects.append(task)
     return task_objects
 
+def update_task_status(task_name, status):
+    connection = create_connection()
+    if connection:
+        cursor = connection.cursor()
+        query = "UPDATE tasks SET status = %s WHERE name = %s"
+        cursor.execute(query, (status, task_name))
+        connection.commit()
+        cursor.close()
+        connection.close()
+
 db_tasks = get_tasks()
 tasks = transform_tasks(db_tasks)
 
@@ -127,7 +127,7 @@ def transform_schedules(db_schedules):
         day = row['day_of_week']
         start_time = (datetime.datetime.min + row['start_hour']).time() if isinstance(row['start_hour'], datetime.timedelta) else row['start_hour']
         end_time = (datetime.datetime.min + row['end_hour']).time() if isinstance(row['end_hour'], datetime.timedelta) else row['end_hour']
-
+        
         if category not in schedules:
             schedules[category] = []
         schedules[category].append({"days": [day], "hours": (start_time, end_time)})
@@ -138,7 +138,7 @@ schedules = transform_schedules(db_schedules)
 
 # Generate 5-minute slots for all schedules
 start_date = datetime.date.today()
-end_date = start_date + relativedelta(months=+1)
+end_date = start_date+relativedelta(months=+1)
 all_slots = create_time_slots(schedules, start_date, end_date)
 
 # Initialize the model
@@ -150,19 +150,23 @@ task_ends = {}
 task_intervals = []
 task_vars = []
 
+overlap_intervals = []  # To track all intervals for NoOverlap constraint
+
 for task in tasks:
-    valid_slots = [(start, end) for start, end, category in all_slots if category == task.category and start >= task.start_time]
+    valid_slots = [(start, end) for start, end, category in all_slots if category == task.category and start >= task.start_time and end <= task.deadline]
     valid_start_times = [start for start, _ in valid_slots]
 
     if not valid_start_times:
-        print(f"Warning: No valid slots available for task: {task.name}. Scheduling will attempt to exceed constraints.")
-        valid_start_times = [task.start_time]
+        print(f"Warning: Task {task.name} cannot be fully scheduled within its constraints. Marking as delayed.")
+        update_task_status(task.name, 'delayed')
+        continue
 
-    start_var = model.NewIntVar(min(valid_start_times), max(valid_start_times) + task.duration * 60, f"{task.name}_start")
-    end_var = model.NewIntVar(min(valid_start_times), max(valid_start_times) + task.duration * 60, f"{task.name}_end")
+    start_var = model.NewIntVar(min(valid_start_times), max(valid_start_times), f"{task.name}_start")
+    end_var = model.NewIntVar(min(valid_start_times), max(valid_start_times), f"{task.name}_end")
 
     model.Add(end_var == start_var + task.duration * 60)
 
+    # Add splitting logic to split tasks into chunks
     remaining_duration = task.duration * 60
     split_intervals = []
 
@@ -193,6 +197,12 @@ for task in tasks:
     task_ends[task.name] = end_var
     task_intervals.extend(split_intervals)
     task_vars.append((task, split_intervals))
+
+    # Add intervals to overlap constraint list
+    overlap_intervals.extend(split_intervals)
+
+# Add NoOverlap constraint to prevent overlapping intervals
+model.AddNoOverlap(overlap_intervals)
 
 # Objective: Maximize priority-based scheduling
 objective = sum(task.priority * task_starts[task.name] for task, _ in task_vars)
