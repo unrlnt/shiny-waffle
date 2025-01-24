@@ -1,5 +1,5 @@
 from ortools.sat.python import cp_model
-from datetime import *
+import datetime
 from import_db import create_connection
 from dateutil.relativedelta import relativedelta
 
@@ -132,7 +132,7 @@ schedules = transform_schedules(db_schedules)
 print("Parsed Schedules:", schedules)
 
 # Generate 5-minute slots for all schedules
-start_date = datetime.date.now()
+start_date = datetime.date.today()
 end_date = start_date+relativedelta(months=+1)
 all_slots = create_time_slots(schedules, start_date, end_date)
 
