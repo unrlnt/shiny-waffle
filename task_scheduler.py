@@ -93,10 +93,7 @@ def transform_tasks(db_tasks):
     return task_objects
 
 db_tasks = get_tasks()
-print("Fetched Tasks:", db_tasks)
-
 tasks = transform_tasks(db_tasks)
-print("Parsed Tasks:", tasks)
 
 # Define schedules
 def get_schedules():
@@ -112,7 +109,6 @@ def get_schedules():
     return []
 
 fetched_schedules = get_schedules()
-print("Fetched Schedules:", fetched_schedules)
 
 def transform_schedules(db_schedules):
     schedules = {}
@@ -129,7 +125,6 @@ def transform_schedules(db_schedules):
 
 db_schedules = get_schedules()
 schedules = transform_schedules(db_schedules)
-print("Parsed Schedules:", schedules)
 
 # Generate 5-minute slots for all schedules
 start_date = datetime.date.today()
