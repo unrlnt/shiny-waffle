@@ -17,6 +17,10 @@ class Task:
         self.priority = priority  # 0 to 1
         self.category = category
 
+    def __repr__(self):
+        return (f"Task(name={self.name}, start_time={self.start_time}, deadline={self.deadline}, "
+                f"duration={self.duration}, priority={self.priority}, category={self.category})")
+
 def create_time_slots(schedules, start_date, end_date):
     slots = []
     current_date = start_date
@@ -114,8 +118,8 @@ def transform_schedules(db_schedules):
     for row in db_schedules:
         category = row['category']
         day = row['day_of_week']
-        start_time = row['start_hour']
-        end_time = row['end_hour']
+        start_time = (datetime.datetime.min + row['start_hour']).time() if isinstance(row['start_hour'], datetime.timedelta) else row['start_hour']
+        end_time = (datetime.datetime.min + row['end_hour']).time() if isinstance(row['end_hour'], datetime.timedelta) else row['end_hour']
         
         if category not in schedules:
             schedules[category] = []
