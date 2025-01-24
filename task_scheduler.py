@@ -30,8 +30,8 @@ def create_time_slots(schedules, start_date, end_date):
             for schedule in schedule_list:
                 if weekday in schedule["days"]:
                     start_hour, end_hour = schedule["hours"]
-                    start_time = datetime.datetime.combine(current_date, datetime.time(start_hour))
-                    end_time = datetime.datetime.combine(current_date, datetime.time(end_hour))
+                    start_time = datetime.datetime.combine(current_date, start_hour)
+                    end_time = datetime.datetime.combine(current_date, end_hour)
                     current_slot = start_time
                     while current_slot < end_time:
                         next_slot = current_slot + datetime.timedelta(minutes=5)
