@@ -145,7 +145,7 @@ task_intervals = []
 task_vars = []
 
 for task in tasks:
-    valid_slots = [(start, end) for start, end, category in all_slots if category == task.category and start >= task.start_date and end <= task.deadline]
+    valid_slots = [(start, end) for start, end, category in all_slots if category == task.category and start >= task.start_time and end <= task.deadline]
     valid_start_times = [start for start, _ in valid_slots]
 
     if not valid_start_times:
