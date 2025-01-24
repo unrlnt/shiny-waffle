@@ -127,7 +127,7 @@ db_schedules = get_schedules()
 schedules = transform_schedules(db_schedules)
 
 # Generate 5-minute slots for all schedules
-start_date = datetime.dateime.now()
+start_date = datetime.datetime.now()
 end_date = datetime.date.today()+relativedelta(months=+1)
 all_slots = create_time_slots(schedules, start_date, end_date)
 
